@@ -1,9 +1,7 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import json
 import re
+import sys
+import os
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -19,9 +17,11 @@ def convert_qsf():
     ^super helpful
     """
     # Read QSF file into memory
-    file = open('./original.qsf', 'r')
+    path = sys.argv[1]
+    if not os.path.exists(path):
+        raise FileNotFoundError("Cannot find the specified QSF.")
+    file = open(path, 'r')
     qsf = json.loads(file.read())
-    print(qsf.keys())
     file.close()
 
     # find the items that are actually questions
@@ -182,8 +182,6 @@ def convert_qsf():
             question groups for each item
     """
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     convert_qsf()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
