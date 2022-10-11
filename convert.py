@@ -98,7 +98,7 @@ def convert_qsf():
             df[col] = None
 
     df.fillna("", inplace=True)
-    df.to_csv("converted_qsf.csv", index=False)
+    df.to_csv(f"converted/{os.path.basename(path)[:-4]}.csv", index=False)
 
     """
     Qualtrics fields
