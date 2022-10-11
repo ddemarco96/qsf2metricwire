@@ -2,3 +2,5 @@
 .original.qsf
 .converted.csv
 .DS_Store
+/original/*
+/converted/*
