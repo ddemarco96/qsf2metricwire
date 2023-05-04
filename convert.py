@@ -2,6 +2,7 @@ import json
 import re
 import sys
 import os
+from pprint import pprint
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -35,14 +36,17 @@ def convert_qsf():
             question['text'] = soup.get_text()
             question['qualtrics_type'] = item['Payload']['QuestionType']
             if "Choices" in item['Payload'].keys():
-                choice_dict = item['Payload']['Choices']
                 # choices come in as a dictionary where each key contains a sub-dictionary of "Display": value_we_want
-                question['choices'] = "|".join([choice['Display'] for choice in choice_dict.values()])
+                choice_dict = item['Payload']['Choices']
 
-            if "RecodeValues" in item['Payload'].keys():
-                question['recoded'] = True
-                choice_dict = item['Payload']['RecodeValues']
-                question['choices'] = "|".join([choice['Display'] for choice in choice_dict.values()])
+                if "RecodeValues" in item['Payload'].keys() and not item['Payload'].get('DynamicChoices', None):
+                    question['recoded'] = True
+                    recode_keys = item['Payload']['RecodeValues']
+                    recode_dict = {str(recode_keys[key]): choice_dict[key] for key in choice_dict.keys() if key in recode_keys.keys()}
+                    choice_dict = recode_dict
+
+                question['choices'] = "|".join([choice['Display'] for choice in choice_dict.values()]) if choice_dict else ""
+
 
             if question['qualtrics_type'] == "MC":
                 choice_str = question['choices']
@@ -98,6 +102,9 @@ def convert_qsf():
             df[col] = None
 
     df.fillna("", inplace=True)
+    # created the converted directory if it doesn't exist
+    if not os.path.exists("converted"):
+        os.mkdir("converted")
     df.to_csv(f"converted/{os.path.basename(path)[:-4]}.csv", index=False)
 
     """
